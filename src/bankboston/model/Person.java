@@ -27,7 +27,7 @@ public class Person {
         this.municipality = municipality;
         this.phoneNumber = phoneNumber;
     }
-
+     // TODO: Possibly delete
     public void getClientData() {
         System.out.println("\n=== Datos del cliente ===");
         System.out.println("RUT: " + this.RUT);

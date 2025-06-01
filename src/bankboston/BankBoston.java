@@ -7,6 +7,9 @@ package bankboston;
 import java.util.LinkedList;
 import java.util.Scanner;
 import bankboston.model.Account;
+import bankboston.model.CheckingAccount;
+import bankboston.model.SavingAccount;
+import bankboston.model.CreditAccount;
 import bankboston.model.Person;
 
 
@@ -15,7 +18,11 @@ public class BankBoston {
     static LinkedList<Account> accounts = new LinkedList<>();
    
     public static void main(String[] args) {        
-         boolean running = true;
+        showMenu();     
+    }
+
+    static void showMenu() {
+        boolean running = true;
             while (running) {
             System.out.println("\n=== Banco De Boston ===");
             System.out.println("1. Registrar cliente");
@@ -39,40 +46,83 @@ public class BankBoston {
                 }
                 default -> System.out.println("Opción no válida.");
             }
-        }        
+        } 
     }
     
     static void registerClient() {
         System.out.println("\n=== Ingrese los datos del cliente ===");
-        String personRUT = getClientRUT();
+        String personRUT = getClientRut();
+    
         System.out.println("Ingrese Nombre: ");
         String name = readString();
+    
         System.out.println("Ingrese apellido paterno: ");
         String paternalSurname = readString();
+        
         System.out.println("Ingrese apellido materno: ");
         String maternalSurname = readString();
+  
         System.out.println("Ingrese domicilio: ");
         String address = readString();
+   
         System.out.println("Ingrese comuna: ");
         String municipality = readString();
+   
         System.out.println("Ingrese teléfono: ");
         int phoneNumber = readInt();
+  
         Person person = new Person(personRUT, name, maternalSurname, paternalSurname, address, municipality, phoneNumber);
+        
+        System.out.println("Seleccione el tipo de cuenta");
+        int accountType = getAccountType();
+        
         System.out.println("Ingrese numero de cuenta corriente: ");
         int accountNumber = getNewValidAccountNumber();
-        double initialBalance = 0.0;
-        Account newAccount = new Account(accountNumber, initialBalance, person);
-        accounts.add(newAccount);
+        
+        createAccountByType(accountType, accountNumber, person);
+
         System.out.println("Cliente registrado exitosamente!");
     };
     
+    static void createAccountByType(int accountType, int accountNumber, Person person) {
+         Account newAccount;
+         switch (accountType) {
+            case 1 -> newAccount = new CheckingAccount(accountNumber, person);
+            case 2 -> newAccount = new SavingAccount(accountNumber, person);
+            case 3 -> newAccount = new CreditAccount (accountNumber, person);
+            default -> newAccount = new CheckingAccount(accountNumber, person);
+        }
+        accounts.add(newAccount);
+    }
+    
+    
+     static int getAccountType() {
+       System.out.println("\n=== Seleccione el tipo de cuenta ===");
+       System.out.println("1. Cuenta Corriente");
+       System.out.println("2. Cuenta De Ahorro");
+       System.out.println("3. Cuenta De Credito");
+    
+       int option = readInt();
+       int accountType = 1;
+       
+       switch (option) {
+                case 1 -> accountType = 1;
+                case 2 -> accountType = 2;
+                case 3 -> accountType = 3;
+                default -> System.out.println("Opción no válida. Se asignará una Cuenta Corriente");
+            }
+    
+       return accountType;
+    };
+    
+   
     static void viewClientData() {
         System.out.println("Ingrese número de cuenta: ");
         int number = readInt();
 
         for (Account acc : accounts) {
             if (acc.getAccountNumber() == number) {
-                acc.getClientData();
+                acc.displayClientInfo();
                 return;
             }
         }
@@ -104,7 +154,7 @@ public class BankBoston {
             if (acc.getAccountNumber() == number) {
                 System.out.println("Ingrese monto a girar: ");
                 double amount = readInt();
-                acc.withdrawMoney(amount);
+                acc.withdraw(amount);
                 return;
             }
         }
@@ -127,25 +177,70 @@ public class BankBoston {
     }
    
   
+    static String getClientRut() {
+         System.out.println("Ingrese RUT: ");
+         String rut = scanner.nextLine();
+         Boolean isValidRut = false;
+         isValidRut = isValidRut(rut);
+         if (!isValidRut) {
+             System.out.println("Rut invalido. Inténtelo nuevamente");
+             getClientRut();
+         }
+         return rut;
+    };
     
-    static String getClientRUT() {
-        int MIN_CHAR_LIMIT = 11;
-        int MAX_CHAR_LIMIT = 12;
-        Boolean isValidRUT = false;
-        String validRUT = "";
-  
-        System.out.println("RUT: ");
-        while (isValidRUT == false) {
-             String rawInputRUT = scanner.nextLine();
-             isValidRUT = hasValidNumberOfCharactersByLimits(rawInputRUT.length(), MIN_CHAR_LIMIT, MAX_CHAR_LIMIT);
-             if (isValidRUT == false) {
-                 System.out.println("RUT Invalido. Debe tener entre 11 y 12 digitos. Intente otra vez: ");
-             } else {
-                validRUT = rawInputRUT;
-             }
-        }
-        return validRUT;
+    static Boolean isValidRut(String rut) {
+        final int MIN_LENGTH = 11;
+        final int MAX_LENGTH = 12;
+
+        boolean isEmpty = stringInputIsEmpty(rut);
+        boolean hasValidLength = hasValidNumberOfCharactersByLimits(rut.length(), MIN_LENGTH, MAX_LENGTH);
+        boolean hasValidDV = isValidChileanRUT(rut);
+
+        boolean isValid = !isEmpty && hasValidLength && hasValidDV;
+
+        return isValid;
     }
+
+    static Boolean stringInputIsEmpty(String input) {
+        return input.isBlank();
+    }
+    
+    static boolean isValidChileanRUT(String rut) {
+        rut = rut.replace(".", "").replace("-", "").toUpperCase();
+
+        if (rut.length() < 2) return false;
+
+        String numberPart = rut.substring(0, rut.length() - 1);
+        char givenDigitVerificator = rut.charAt(rut.length() - 1);
+
+        try {
+            int rutNumber = Integer.parseInt(numberPart);
+            char expectedDigitVerificator = calculateRUTCheckDigit(rutNumber);
+
+            return expectedDigitVerificator == givenDigitVerificator;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    static char calculateRUTCheckDigit(int rut) {
+        int sum = 0;
+        int multiplier = 2;
+
+        while (rut > 0) {
+            int digit = rut % 10;
+            sum += digit * multiplier;
+            rut /= 10;
+            multiplier = (multiplier == 7) ? 2 : multiplier + 1;
+        }
+
+        int remainder = 11 - (sum % 11);
+        if (remainder == 11) return '0';
+        if (remainder == 10) return 'K';
+        return (char) (remainder + '0');
+    }
+    
     
     static int getNewValidAccountNumber() {
         int accountNumber = 0;
