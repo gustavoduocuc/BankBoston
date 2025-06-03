@@ -1,13 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package bankboston.model;
 
-/**
- *
- * @author gustavo.dominguez
- */
 public class CheckingAccount extends Account {
    
     public CheckingAccount(int accountNumber, Person person) {
@@ -18,7 +10,7 @@ public class CheckingAccount extends Account {
     public void deposit(double amount) {
         if (amount > 0) {
             this.balance += amount;
-            System.out.println("Depósito realizado con éxito a la cuenta corriente. Saldo actual: $" + this.balance);
+            System.out.println("Depósito realizado con éxito a la " + getAccountTypeString() + ". Saldo actual: $" + this.balance);
         } else {
             System.out.println("Monto inválido. Debe ser mayor que cero.");
         }
@@ -32,13 +24,17 @@ public class CheckingAccount extends Account {
             System.out.println("Saldo insuficiente. No puede girar más de $" + this.balance);
         } else {
             this.balance -= amount;
-            System.out.println("Giro realizado con éxito a su cuenta corriente. Saldo restante: $" + this.balance);
+            System.out.println("Giro realizado con éxito a su " + getAccountTypeString() + ". Saldo restante: $" + this.balance);
         }
     }
     
     @Override
     public void checkBalance() {
-        System.out.println("Saldo actual en la cuenta corriente: $" + this.balance);
+        System.out.println("Saldo actual en la " + getAccountTypeString() + ": $" + this.balance);
     }
     
+    @Override
+    public String getAccountTypeString() {
+        return "Cuenta Corriente";
+    }
 }

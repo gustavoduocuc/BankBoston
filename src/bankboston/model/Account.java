@@ -33,7 +33,7 @@ public abstract class Account implements Displayable {
     public void displayClientInfo() {
         System.out.println("\n=== Información del Cliente ===");
         person.getClientData();
-        System.out.println("Tipo de cuenta: " + this.getClass().getSimpleName());
+        System.out.println("Tipo de cuenta: " + getAccountTypeString());
         System.out.println("Número de cuenta: " + accountNumber);
         System.out.println("Saldo: $" + balance);
     }
@@ -42,4 +42,5 @@ public abstract class Account implements Displayable {
     public abstract void deposit(double amount);
     public abstract void withdraw(double amount);
     public abstract void checkBalance();
+    public abstract String getAccountTypeString();
 }
