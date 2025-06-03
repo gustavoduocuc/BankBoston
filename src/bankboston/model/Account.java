@@ -1,8 +1,9 @@
 package bankboston.model;
+import bankboston.interfaces.Displayable;
 
-public class Account {
-    private int accountNumber;
-    private double balance;
+public abstract class Account implements Displayable {
+    protected int accountNumber;
+    protected double balance;
     private Person person;
 
     public Account(int accountNumber, double balance, Person person) {
@@ -10,46 +11,36 @@ public class Account {
         this.balance = 0.0;
         this.person = person;
     }
-
+    
+    // Sobrecarga: balance parte en 0
+    public Account(int accountNumber, Person person) {
+        this(accountNumber, 0.0, person);
+    }
+        
+    public Person getPerson() {
+        return person;
+    }
+    
     public int getAccountNumber() {
-        return this.accountNumber;
+        return accountNumber;
     }
 
     public double getBalance() {
-        return this.balance;
+        return balance;
     }
-
-    public void getClientData() {
+    
+    @Override
+    public void displayClientInfo() {
+        System.out.println("\n=== Información del Cliente ===");
         person.getClientData();
-        System.out.println("Cuenta Corriente: " + this.accountNumber);
-        System.out.println("Saldo: $" + this.balance);
+        System.out.println("Tipo de cuenta: " + getAccountTypeString());
+        System.out.println("Número de cuenta: " + accountNumber);
+        System.out.println("Saldo: $" + balance);
     }
 
-    public void deposit(double amount) {
-        if (amount > 0) {
-            this.balance += amount;
-            System.out.println("Depósito realizado con éxito. Saldo actual: $" + this.balance);
-        } else {
-            System.out.println("Monto inválido. Debe ser mayor que cero.");
-        }
-    }
-
-    public void withdrawMoney(double amount) {
-        if (amount <= 0) {
-            System.out.println("Monto inválido. Debe ser mayor que cero.");
-        } else if (amount > this.balance) {
-            System.out.println("Saldo insuficiente. No puede girar más de $" + this.balance);
-        } else {
-            this.balance -= amount;
-            System.out.println("Giro realizado con éxito. Saldo restante: $" + this.balance);
-        }
-    }
-
-    public void checkBalance() {
-        System.out.println("Saldo actual: $" + this.balance);
-    }
-
-    public Person getPerson() {
-        return this.person;
-    }
+    
+    public abstract void deposit(double amount);
+    public abstract void withdraw(double amount);
+    public abstract void checkBalance();
+    public abstract String getAccountTypeString();
 }
